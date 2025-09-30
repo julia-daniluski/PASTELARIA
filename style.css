@@ -63,7 +63,7 @@ body {
   border-radius: 10px;
   width: 80%;           
   max-width: 800px;     
-  box-shadow: 10px 10px 16px #59191e98;
+  box-shadow: 3px 10px 10px #59191e98;
   animation: fadeIn 0.6s ease-in-out;
 }
 
@@ -88,7 +88,7 @@ h1:hover {
     text-align: center;
     border-radius: 8px; 
     color: #59191E;
-    box-shadow: 10px 10px 16px #59191e98;
+    box-shadow: 3px 10px 10px #59191e98;
 }
 
 /* ALERTA DE ESTOQUE */
@@ -99,7 +99,7 @@ h1:hover {
     margin-bottom: 20px;
     color: #c70000;
     font-weight: 600;
-    box-shadow: 10px 10px 16px #59191e98;
+    box-shadow: 3px 10px 10px #59191e98;
 }
 
 .alert h3 {
@@ -153,7 +153,7 @@ h1:hover {
   background: #F2A74B;
   color: #fff;
   transform: translateY(-2px);
-  box-shadow: 10px 10px 16px #59191e98;
+  box-shadow: 3px 10px 10px #59191e98;
 }
 
 /* formulários */
@@ -245,7 +245,7 @@ h1:hover {
     text-decoration: none; /* remove linha do link */
     text-align: center;
     cursor: pointer;
-      box-shadow: 3px 10px 16px #59191e98;
+      box-shadow: 3px 10px 10px #59191e98;
     transition: all 0.3s ease;
 }
 
@@ -254,7 +254,7 @@ h1:hover {
     background: #59191E;
     color: #F2B90C;
     transform: translateY(-2px);
-    box-shadow: 3px 10px 16px #F2B90C;
+    box-shadow: 3px 10px 10px #F2B90C;
 }
 
 /* pagina de login */
