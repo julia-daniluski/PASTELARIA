@@ -4,7 +4,7 @@
 $servername = "localhost"; // Nome do servidor do banco (localmente localhost)
 $username = "root";        // Usuário do banco de dados
 $password = "Senai@118";            // Senha do banco (vazia no XAMPP padrão)
-$dbname = "pastelaria_db";   // Nome do banco de dados da pizzaria
+$dbname = "pastelaria";   // Nome do banco de dados da pastelaria
 
 // Cria a conexão com o banco de dados
 $conn = new mysqli($servername, $username, $password, $dbname);
