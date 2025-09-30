@@ -34,6 +34,10 @@ body {
   animation: fadeIn 0.6s ease-in-out;
 }
 
+table{
+  
+}
+
 /* Cabeçalhos */* {
     margin: 0;
     padding: 0;
@@ -67,6 +71,61 @@ body {
   box-shadow: 3px 10px 10px #59191e98;
   animation: fadeIn 0.6s ease-in-out;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: 'Poppins', sans-serif;
+    background: #fdefc4ad;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 3px 10px 10px #59191e98;
+}
+
+/* Cabeçalho */
+table th {
+    background-color: #F2B90C;
+    color: #59191E;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+/* Linhas da tabela */
+table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0cfa6;
+    color: #3c1216;
+}
+
+/* Alternância de cores */
+table tr:nth-child(even) {
+    background-color: rgba(245, 231, 197, 0.5);
+}
+
+/* Hover */
+table tr:hover {
+    background-color: rgba(242, 185, 12, 0.2);
+}
+
+/* Entrada e Saída */
+td.entrada {
+    color: #2e7d32; /* verde */
+    font-weight: 600;
+}
+
+td.saida {
+    color: #c62828; /* vermelho */
+    font-weight: 600;
+}
+
+/* Observações podem ser itálico */
+td:nth-child(6) {
+    font-style: italic;
+    color: #3c1216;
+}
+
 
 h1{
   text-align: center;
