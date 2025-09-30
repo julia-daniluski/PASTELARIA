@@ -13,8 +13,8 @@ $mensagem_erro = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     include 'config.php';
 
-    $nome_digitado  = $_POST['nome'];
-    $senha_digitada = $_POST['senha'];
+    $nome_digitado  = trim($_POST['nome']);   // remove espaços extras
+    $senha_digitada = trim($_POST['senha']);  // remove espaços extras
 
     $stmt = $conn->prepare("SELECT id, nome, senha FROM usuarios WHERE nome = ?");
     $stmt->bind_param("s", $nome_digitado);
@@ -24,8 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($resultado->num_rows > 0) {
         $dados_usuario = $resultado->fetch_assoc();
 
-        if (password_verify($senha_digitada, $dados_usuario['senha'])) {
-            // Armazena apenas dados essenciais na sessão
+        // Comparação direta com texto puro
+        if ($senha_digitada === $dados_usuario['senha']) {
             $_SESSION['usuario_id'] = $dados_usuario['id'];
             $_SESSION['usuario_nome'] = $dados_usuario['nome'];
             header("Location: index.php");
