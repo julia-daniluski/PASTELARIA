@@ -30,7 +30,8 @@ $alerta_estoque = gerarAlertaEstoque($conn);
 </head>
 <body>
     <div class="container">
-        <h1>Sistema Pastelaria</h1>        
+        <img src="https://i.pinimg.com/originals/28/12/d7/2812d78d2f192fc317da48602c93666c.png" alt="pastel sorrindo" class="logo">
+        <h1>Sistema Pastelazzo</h1>        
         <div class="welcome">
             Bem-vindo, <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!
         </div>
