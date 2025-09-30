@@ -14,15 +14,15 @@ include 'funcoes_estoque.php';
 
 // Se o usuário clicou em "Registrar"
 if ($_POST['add_movimento'] ?? false) {
-    $pizza_escolhida = $_POST['pastel_id'];
+    $pastel_escolhido = $_POST['pastel_id'];
     $tipo_movimento = $_POST['tipo'];
     $quantidade_movimento = $_POST['quantidade'];
     $observacoes_movimento = $_POST['observacoes'];
     $usuario_id = $_SESSION['usuario']['id'];
     
     // Inserir movimentação no banco
-    $sql = "INSERT INTO movimentacoes (pizza_id, usuario_id, data_hora, tipo, quantidade, observacoes) 
-            VALUES ($pastel_escolhida, $usuario_id, NOW(), '$tipo_movimento', $quantidade_movimento, '$observacoes_movimento')";
+    $sql = "INSERT INTO movimentacoes (pastel_id, usuario_id, data_hora, tipo, quantidade, observacoes) 
+            VALUES ($pastel_escolhido, $usuario_id, NOW(), '$tipo_movimento', $quantidade_movimento, '$observacoes_movimento')";
     $conn->query($sql);
     
     // Voltar para a mesma página
@@ -48,7 +48,7 @@ $resultado_movimentacoes = $conn->query($sql_movimentacoes);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movimentações - Sistema Pastezzaria</title>
+    <title>Movimentações - Sistema Pastelaria</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -62,13 +62,13 @@ $resultado_movimentacoes = $conn->query($sql_movimentacoes);
             <form method="post">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Pastel:</label>
+                        <label>pastel:</label>
                         <select name="pastel_id" required>
-                            <option value="">Selecione uma pastel</option>
+                            <option value="">Selecione um pastel</option>
                             <?php while($pastel = $resultado_pasteis->fetch_assoc()): 
                                 $pastel_id = $pastel['id'];
                                 
-                                // Calcular estoque atual desta pastel
+                                // Calcular estoque atual desta pizza
                                 $sql_entradas = "SELECT SUM(quantidade) as total FROM movimentacoes WHERE pastel_id = $pastel_id AND tipo = 'entrada'";
                                 $entradas = $conn->query($sql_entradas)->fetch_assoc();
                                 $total_entradas = $entradas['total'] ? $entradas['total'] : 0;
