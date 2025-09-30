@@ -1,20 +1,31 @@
-/* =========================
-   Reset e Tipografia
-   ========================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Marcellus', cursive;
+}
+
 body {
   font-family: Arial, sans-serif;
-  background: #F2B90C;
+  background-color: #F2B90C;
   padding: 20px;
   line-height: 1.5;
   margin: 0;
   color: #59191E;
+  background-position: center; 
+  background-size: cover; 
+  height: calc(100vh - 60px); /* supondo que o menu tenha 60px de altura */
+  position: relative; /* IMPORTANTE para posicionamentos absolutos */
+  display: flex;
+  justify-content: center; /* centraliza o texto */
+  align-items: center;
 }
 
 /* =========================
    Container Principal
    ========================= */
 .container {
-  background: #F2A81D;
+  background-color: #F2A81D;
   padding: 25px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -36,7 +47,7 @@ h1 {
    Mensagem de boas-vindas
    ========================= */
 .welcome {
-  background: #F2F2F2;
+  background-color: #F2F2F2;
   padding: 12px;
   margin-bottom: 20px;
   text-align: center;
@@ -52,7 +63,7 @@ h1 {
   padding: 8px 15px;
   text-decoration: none;
   border: 1px solid #ccc;
-  background: #F2F2F2;
+  background-color: #F2F2F2;
   color: #59191E;
   margin: 3px;
   display: inline-block;
@@ -62,7 +73,7 @@ h1 {
 }
 
 .btn:hover {
-  background: #F2A74B;
+  background-color: #F2A74B;
   color: #F2F2F2;
   border-color: #F2A81D;
 }
