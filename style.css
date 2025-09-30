@@ -146,7 +146,7 @@ h1:hover {
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 600;
-  box-shadow: 3px 10px 16px #59191e98;
+  box-shadow: 3px 10px 10px #59191e98;
 }
 
 .btn:hover {
