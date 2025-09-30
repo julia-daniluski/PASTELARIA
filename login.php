@@ -48,7 +48,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="login-page">
     <div class="login-container">
-        <h1>Sistema Pastelaria</h1>
+        <img src="https://i.pinimg.com/originals/28/12/d7/2812d78d2f192fc317da48602c93666c.png" alt="pastel sorrindo" class="logo">
+        <h1>Sistema Pastelazzo</h1>
         <form method="post">
             <div class="form-group">
                 <label>Usuário:</label>

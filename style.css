@@ -104,6 +104,7 @@ h1 {
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  color: #3c1216;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
@@ -114,6 +115,13 @@ h1 {
   box-shadow: 0 0 6px rgba(242, 185, 12, 0.3);
   outline: none;
 }
+
+.logo{
+  width: 100px;
+  display: block;
+  margin: 0 auto;
+}
+
 
 /* =========================
    Login
@@ -127,16 +135,14 @@ h1 {
   background: 
     linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
     url(https://t4.ftcdn.net/jpg/04/34/95/07/360_F_434950772_lp0E1PSqFLmmFZC4oqKsH6uxwGjbGpJr.jpg);
-  background-size: cover;      /* Faz a imagem cobrir toda a área */
-  background-repeat: no-repeat; /* Evita repetição */
-  background-position: center;  /* Centraliza a imagem */
+  background-size: cover;      
+  background-repeat: no-repeat; 
+  background-position: center;  
 }
-
-
 
 .login-container {
   background: #fdefc4ad;
-  padding: 35px;
+  padding: 20px;
   border-radius: 10px ;
   width: 100%;
   max-width: 360px;
@@ -167,7 +173,7 @@ h1 {
    ========================= */
 .erro {
   background: rgba(242, 167, 75, 0.2);
-  color: #59191E;
+  color: #ff0015;
   text-align: center;
   margin-top: 12px;
   padding: 10px;
