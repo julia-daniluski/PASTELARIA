@@ -123,33 +123,100 @@ td.entrada { color: #2e7d32; font-weight: 600; }
 td.saida { color: #c62828; font-weight: 600; }
 td:nth-child(6) { font-style: italic; }
 
+/* ============================== */
 /* TEXTOS */
+/* ============================== */
+
 h1, h3 {
   text-align: center;
   margin-bottom: 25px;
   color: #59191E;
+  letter-spacing: 1px;
   transition: transform 0.3s ease;
 }
 
-h1 { font-size: 2rem; letter-spacing: 1px; }
-h3 { font-size: 1.5rem; letter-spacing: 1px; }
+h1 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
 
-h1:hover, h3:hover { transform: scale(1.1); }
+h1:hover, h3:hover {
+  transform: scale(1.08);
+}
 
-/* ALERTAS E MENSAGENS */
-.welcome, .alert {
-  background: #fdefc4ad;
+/* ============================== */
+/* CABEÇALHO E TÍTULO */
+/* ============================== */
+
+.cabecalho {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.cabecalho h1 {
+  font-family: 'Marcellus', serif;
+  color: #59191E;
+  font-size: 2.2em;
+  margin-bottom: 12px;
+  text-shadow: 1px 3px 6px rgba(89, 25, 30, 0.3);
+}
+
+/* ============================== */
+/* MENSAGEM DE BOAS-VINDAS */
+/* ============================== */
+
+.welcome {
+  background: rgba(253, 239, 196, 0.75);
+  display: inline-block;
+  padding: 12px 22px;
+  border-radius: 10px;
+  color: #59191E;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 6px 12px rgba(89, 25, 30, 0.35);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    background-color 0.35s ease;
+}
+
+.welcome:hover {
+  transform: scale(1.05) translateY(-3px);
+  background-color: rgba(253, 239, 196, 0.9);
+  box-shadow: 0 10px 18px rgba(89, 25, 30, 0.4);
+}
+
+/* ============================== */
+/* ALERTAS E MENSAGENS DE ERRO */
+/* ============================== */
+
+.alert {
+  background: rgba(253, 239, 196, 0.68);
+  color: #c70000;
   padding: 14px 18px;
   margin-bottom: 20px;
   text-align: center;
-  border-radius: 8px;
-  color: #59191E;
-  box-shadow: 3px 10px 10px #59191e98;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(89, 25, 30, 0.4);
+  display: inline-block;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    background-color 0.35s ease;
 }
 
-.alert { color: #c70000; }
+.alert:hover {
+  transform: scale(1.05) translateY(-3px);
+  background-color: rgba(253, 239, 196, 0.9);
+  box-shadow: 0 10px 20px rgba(89, 25, 30, 0.45);
+}
 
-.alert a, .menu-item a, .btn, .btn-link {
+/* ============================== */
+/* BOTÕES E LINKS */
+/* ============================== */
+
+.alert a,
+.menu-item a,
+.btn,
+.btn-link {
   display: inline-block;
   text-decoration: none;
   color: #59191E;
@@ -157,17 +224,21 @@ h1:hover, h3:hover { transform: scale(1.1); }
   padding: 10px 15px;
   border-radius: 6px;
   font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
   text-align: center;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-.alert a:hover, .menu-item a:hover, .btn:hover, .btn-link:hover {
+.alert a:hover,
+.menu-item a:hover,
+.btn:hover,
+.btn-link:hover {
   background: #59191E;
   color: #F2B90C;
   transform: translateY(-2px);
 }
+
 
 /* FORMULÁRIOS */
 .form-group { margin-bottom: 15px; }
