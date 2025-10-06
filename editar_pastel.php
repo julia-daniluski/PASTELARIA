@@ -89,7 +89,8 @@ if (isset($_POST['update'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar pastel - Sistema pastelaria</title>
+    <title>Editar pastel - Sistema pastelazzo</title>
+    <link rel="shortcut icon" href="img/favicon.png" type="image/x-icon"> 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
