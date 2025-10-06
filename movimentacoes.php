@@ -12,25 +12,73 @@ if (!isset($_SESSION['usuario'])) {
 include 'config.php';
 include 'funcoes_estoque.php';
 
+// Fallback para app_log caso não esteja definido em config.php
+if (!function_exists('app_log')) {
+    function app_log($message) {
+        $date = date('Y-m-d H:i:s');
+        $line = "[$date] " . (is_string($message) ? $message : json_encode($message, JSON_UNESCAPED_UNICODE)) . PHP_EOL;
+        error_log('[pastelria] ' . $line);
+    }
+}
+
 // Se o usuário clicou em "Registrar"
-if ($_POST['add_movimento'] ?? false) {
-    $pastel_escolhido = $_POST['pastel_id'];
-    $tipo_movimento = $_POST['tipo'];
-    $quantidade_movimento = $_POST['quantidade'];
-    $observacoes_movimento = $_POST['observacoes'];
-    $usuario_id = $_SESSION['usuario']['id'];
-    
-    // Inserir movimentação no banco
-    $sql = "INSERT INTO movimentacoes (pastel_id, usuario_id, data_hora, tipo, quantidade, observacoes) 
-            VALUES ($pastel_escolhido, $usuario_id, NOW(), '$tipo_movimento', $quantidade_movimento, '$observacoes_movimento')";
-    $conn->query($sql);
-    
-    // Voltar para a mesma página
+if (isset($_POST['add_movimento'])) {
+    app_log(['route' => 'mov_add', 'post' => $_POST, 'user' => $_SESSION['usuario'] ?? null]);
+    $pastel_escolhida = trim($_POST['pastel_id'] ?? '');
+    $tipo_movimento = trim($_POST['tipo'] ?? '');
+    $quantidade_movimento = trim($_POST['quantidade'] ?? '');
+    $observacoes_movimento = trim($_POST['observacoes'] ?? '');
+    $usuario_id = (int)($_SESSION['usuario']['id'] ?? 0);
+
+    $erros = array();
+    if (!ctype_digit((string)$pastel_escolhida)) { $erros[] = 'pastel inválida.'; }
+    if ($tipo_movimento !== 'entrada' && $tipo_movimento !== 'saida') { $erros[] = 'Tipo inválido.'; }
+    if (!ctype_digit((string)$quantidade_movimento) || (int)$quantidade_movimento <= 0) { $erros[] = 'Quantidade inválida.'; }
+    if ($usuario_id <= 0) { $erros[] = 'Usuário inválido.'; }
+
+    if (empty($erros)) {
+        // Para saída, validar estoque suficiente
+        if ($tipo_movimento === 'saida') {
+            $pastel_id = (int)$pastel_escolhida;
+            $qtd = (int)$quantidade_movimento;
+            $entradas = $conn->query("SELECT COALESCE(SUM(quantidade),0) AS total FROM movimentacoes WHERE pastel_id = $pastel_id AND tipo = 'entrada'")->fetch_assoc()['total'];
+            $saidas = $conn->query("SELECT COALESCE(SUM(quantidade),0) AS total FROM movimentacoes WHERE pastel_id = $pastel_id AND tipo = 'saida'")->fetch_assoc()['total'];
+            $estoque_atual = (int)$entradas - (int)$saidas;
+            if ($qtd > $estoque_atual) {
+                $erros[] = 'Quantidade de saída supera o estoque atual (' . $estoque_atual . ').';
+                app_log(['route' => 'mov_add', 'status' => 'estoque_insuficiente', 'estoque' => $estoque_atual, 'qtd' => $qtd]);
+            }
+        }
+    }
+
+    if (empty($erros)) {
+        $pastel_id = (int)$pastel_escolhida;
+        $qtd = (int)$quantidade_movimento;
+        $stmt = $conn->prepare("INSERT INTO movimentacoes (pastel_id, usuario_id, data_hora, tipo, quantidade, observacoes) VALUES (?, ?, NOW(), ?, ?, ?)");
+        if ($stmt) {
+            $stmt->bind_param('iisis', $pastel_id, $usuario_id, $tipo_movimento, $qtd, $observacoes_movimento);
+            if ($stmt->execute()) {
+                $_SESSION['flash_success'] = 'Movimentação registrada com sucesso.';
+                app_log(['route' => 'mov_add', 'status' => 'ok', 'insert_id' => $conn->insert_id]);
+            } else {
+                $_SESSION['flash_error'] = 'Erro ao registrar movimentação: ' . $stmt->error;
+                app_log(['route' => 'mov_add', 'status' => 'fail', 'error' => $stmt->error]);
+            }
+            $stmt->close();
+        } else {
+            $_SESSION['flash_error'] = 'Erro ao preparar registro: ' . $conn->error;
+            app_log(['route' => 'mov_add', 'status' => 'prepare_fail', 'error' => $conn->error]);
+        }
+    } else {
+        $_SESSION['flash_error'] = implode(' ', $erros);
+        app_log(['route' => 'mov_add', 'status' => 'validation_fail', 'errors' => $erros]);
+    }
+
     header("Location: movimentacoes.php");
     exit();
 }
 
-// Buscar todas as pizzas ativas
+// Buscar todas as pasteis ativas
 $sql_pasteis = "SELECT * FROM pasteis WHERE ativo = 1 ORDER BY nome";
 $resultado_pasteis = $conn->query($sql_pasteis);
 
@@ -48,12 +96,25 @@ $resultado_movimentacoes = $conn->query($sql_movimentacoes);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movimentações - Sistema Pastelaria</title>
+    <title>Movimentações - Sistema pastelria</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>Movimentações</h1>
+        <?php if (!empty($_GET['debug'])): ?>
+            <div class="alert">
+                <strong>DEBUG</strong>
+                <pre style="white-space:pre-wrap;overflow:auto;max-height:200px;">POST: <?php echo htmlspecialchars(print_r($_POST, true)); ?>
+SESSION: <?php echo htmlspecialchars(print_r($_SESSION, true)); ?></pre>
+            </div>
+        <?php endif; ?>
+        <?php if (!empty($_SESSION['flash_success'])): ?>
+            <div class="alert success"><?php echo htmlspecialchars($_SESSION['flash_success']); unset($_SESSION['flash_success']); ?></div>
+        <?php endif; ?>
+        <?php if (!empty($_SESSION['flash_error'])): ?>
+            <div class="alert error"><?php echo htmlspecialchars($_SESSION['flash_error']); unset($_SESSION['flash_error']); ?></div>
+        <?php endif; ?>
         
         <a href="index.php" class="btn">Voltar</a>
 
@@ -64,11 +125,11 @@ $resultado_movimentacoes = $conn->query($sql_movimentacoes);
                     <div class="form-group">
                         <label>pastel:</label>
                         <select name="pastel_id" required>
-                            <option value="">Selecione um pastel</option>
+                            <option value="">Selecione uma pastel</option>
                             <?php while($pastel = $resultado_pasteis->fetch_assoc()): 
                                 $pastel_id = $pastel['id'];
                                 
-                                // Calcular estoque atual desta pizza
+                                // Calcular estoque atual desta pastel
                                 $sql_entradas = "SELECT SUM(quantidade) as total FROM movimentacoes WHERE pastel_id = $pastel_id AND tipo = 'entrada'";
                                 $entradas = $conn->query($sql_entradas)->fetch_assoc();
                                 $total_entradas = $entradas['total'] ? $entradas['total'] : 0;
@@ -110,7 +171,7 @@ $resultado_movimentacoes = $conn->query($sql_movimentacoes);
 
         <h3>Histórico Recente</h3>
         <table>
-            <tr><th>Data/Hora</th><th>Pastel</th><th>Usuário</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr>
+            <tr><th>Data/Hora</th><th>pastel</th><th>Usuário</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr>
             <?php while($movimentacao = $resultado_movimentacoes->fetch_assoc()): ?>
                 <tr>
                     <td><?= date('d/m H:i', strtotime($movimentacao['data_hora'])) ?></td>
@@ -129,3 +190,5 @@ $resultado_movimentacoes = $conn->query($sql_movimentacoes);
     </div>
 </body>
 </html>
+
+
