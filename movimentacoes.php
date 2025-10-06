@@ -125,9 +125,9 @@ SESSION: <?php echo htmlspecialchars(print_r($_SESSION, true)); ?></pre>
             <form method="post">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>pastel:</label>
+                        <label>Pastel:</label>
                         <select name="pastel_id" required>
-                            <option value="">Selecione uma pastel</option>
+                            <option value="">Selecione um pastel</option>
                             <?php while($pastel = $resultado_pasteis->fetch_assoc()): 
                                 $pastel_id = $pastel['id'];
                                 
