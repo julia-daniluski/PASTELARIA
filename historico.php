@@ -2,11 +2,12 @@
 // Começar a sessão
 session_start();
 
-// Se não está logado, vai para o login
-if (!isset($_SESSION['usuario'])) { 
+session_start();
+if (!isset($_SESSION['usuario_id'])) { 
     header('Location: login.php'); 
     exit(); 
 }
+
 
 // Conectar no banco
 include 'config.php';

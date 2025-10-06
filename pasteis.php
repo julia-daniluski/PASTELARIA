@@ -2,11 +2,12 @@
 // Começar a sessão
 session_start();
 
-// Se não está logado, vai para o login
-if (!isset($_SESSION['usuario'])) { 
+session_start();
+if (!isset($_SESSION['usuario_id'])) { 
     header('Location: login.php'); 
     exit(); 
 }
+
 
 // Conectar no banco
 include 'config.php';
@@ -30,33 +31,18 @@ if (isset($_POST['add'])) {
     $nome_pastel = trim($_POST['nome'] ?? '');
     $ingredientes_pastel = trim($_POST['ingredientes'] ?? '');
     $preco_pastel = str_replace(',', '.', trim($_POST['preco'] ?? '0'));
-    $tamanho_pastel = trim($_POST['tamanho'] ?? '');
     $categoria_pastel = trim($_POST['categoria'] ?? '');
     $estoque_minimo_pastel = trim($_POST['estoque_minimo'] ?? '0');
 
     $erros = array();
     if ($nome_pastel === '') { $erros[] = 'Informe o nome.'; }
     if ($ingredientes_pastel === '') { $erros[] = 'Informe os ingredientes.'; }
-    if ($tamanho_pastel === '') { $erros[] = 'Informe o tamanho.'; }
     if ($categoria_pastel === '') { $erros[] = 'Informe a categoria.'; }
 
     if (!is_numeric($preco_pastel)) { $erros[] = 'Preço inválido.'; }
     if (!ctype_digit((string)$estoque_minimo_pastel)) { $erros[] = 'Estoque mínimo inválido.'; }
 
-    // Normalizar tamanho para os valores aceitos no ENUM
-    $map_tamanho = array(
-        'Pequena' => 'Pequena',
-        'Media' => 'Media',
-        'Média' => 'Media',
-        'Grande' => 'Grande',
-    );
-    if (isset($map_tamanho[$tamanho_pastel])) {
-        $tamanho_pastel = $map_tamanho[$tamanho_pastel];
-    }
-    if (!in_array($tamanho_pastel, array('Pequena', 'Media', 'Grande'), true)) {
-        $erros[] = 'Tamanho inválido.';
-    }
-
+    
     if (empty($erros)) {
         $preco = (float)$preco_pastel;
         $estoque_min = (int)$estoque_minimo_pastel;
@@ -130,7 +116,7 @@ SESSION: <?php echo htmlspecialchars(print_r($_SESSION, true)); ?></pre>
         </div>
 
         <table>
-            <tr><th>Nome</th><th>Ingredientes</th><th>Preço</th><th>Tamanho</th><th>Categoria</th><th>Estoque</th><th>Ações</th></tr>
+            <tr><th>Nome</th><th>Ingredientes</th><th>Preço</th><th>Categoria</th><th>Estoque</th><th>Ações</th></tr>
             <?php 
             // Mostrar cada pastel na tabela
             while($pastel = $resultado_pasteis->fetch_assoc()): 
@@ -155,7 +141,6 @@ SESSION: <?php echo htmlspecialchars(print_r($_SESSION, true)); ?></pre>
                     <td><span class="status-indicator <?= $estoque_baixo ? 'status-baixo' : 'status-ok' ?>"></span><?= htmlspecialchars($pastel['nome']) ?></td>
                     <td><?= htmlspecialchars($pastel['ingredientes']) ?></td>
                     <td>R$ <?= number_format($pastel['preco'], 2, ',', '.') ?></td>
-                    <td><?= htmlspecialchars($pastel['tamanho']) ?></td>
                     <td><?= htmlspecialchars($pastel['categoria']) ?></td>
                     <td><strong><?= $estoque_atual ?></strong>/<?= $estoque_minimo ?><?= $estoque_baixo ? '<br><small>⚠️ Baixo!</small>' : '' ?></td>
                     <td>
@@ -182,15 +167,6 @@ SESSION: <?php echo htmlspecialchars(print_r($_SESSION, true)); ?></pre>
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Tamanho:</label>
-                        <select name="tamanho" required>
-                            <option value="">Selecione</option>
-                            <option value="Pequena">Pequena</option>
-                            <option value="Media">Média</option>
-                            <option value="Grande">Grande</option>
-                        </select>
-                    </div>
                     <div class="form-group">
                         <label>Categoria:</label>
                         <input type="text" name="categoria" required>

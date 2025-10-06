@@ -1,45 +1,87 @@
 <?php
-// Começar a sessão
+// Mostrar erros no navegador (útil para desenvolvimento)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Iniciar sessão
 session_start();
 
 // Se não está logado, vai para o login
-if (!isset($_SESSION['usuario'])) { 
+if (!isset($_SESSION['usuario_id'])) { 
     header('Location: login.php'); 
     exit(); 
 }
 
-// Conectar no banco
+// Conectar ao banco
 include 'config.php';
 
-// Pegar os filtros que o usuário escolheu
-$filtro_pastel = $_GET['pastel'] ?? '';
-$filtro_tipo = $_GET['tipo'] ?? '';
+// Pegar o ID do pastel que queremos editar
+$pastel_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Montar a consulta SQL baseada nos filtros
-$sql = "SELECT m.id, p.nome AS pastel_nome, u.nome AS usuario_nome, m.tipo, m.quantidade, m.data_hora, m.observacoes 
-        FROM movimentacoes m
-        JOIN pasteis p ON m.pastel_id = p.id
-        JOIN usuarios u ON m.usuario_id = u.id
-        WHERE 1=1";
+// Buscar os dados do pastel
+$sql = "SELECT * FROM pasteis WHERE id = $pastel_id";
+$resultado = $conn->query($sql);
+$pastel = $resultado ? $resultado->fetch_assoc() : null;
 
-// Se escolheu uma pastel específica
-if ($filtro_pastel) {
-    $sql .= " AND m.pastel_id = $filtro_pastel";
+// Se não encontrou o pastel, voltar para a lista
+if (!$pastel) { 
+    header('Location: pasteis.php'); 
+    exit(); 
 }
 
-// Se escolheu um tipo específico
-if ($filtro_tipo) {
-    $sql .= " AND m.tipo = '$filtro_tipo'";
+// Se o usuário clicou em "Atualizar"
+if (isset($_POST['update'])) {
+    $nome_pastel = trim($_POST['nome'] ?? '');
+    $ingredientes_pastel = trim($_POST['ingredientes'] ?? '');
+    $preco_pastel = str_replace(',', '.', trim($_POST['preco'] ?? '0'));
+    $categoria_pastel = trim($_POST['categoria'] ?? '');
+    $estoque_minimo_pastel = trim($_POST['estoque_minimo'] ?? '0');
+
+    $erros = [];
+
+    if ($nome_pastel === '') $erros[] = 'Informe o nome.';
+    if ($ingredientes_pastel === '') $erros[] = 'Informe os ingredientes.';
+    if ($categoria_pastel === '') $erros[] = 'Informe a categoria.';
+    if (!is_numeric($preco_pastel)) $erros[] = 'Preço inválido.';
+    if (!ctype_digit((string)$estoque_minimo_pastel)) $erros[] = 'Estoque mínimo inválido.';
+
+    if (empty($erros)) {
+        $preco = (float)$preco_pastel;
+        $estoque_min = (int)$estoque_minimo_pastel;
+
+        $stmt = $conn->prepare("UPDATE pasteis 
+            SET nome = ?, ingredientes = ?, preco = ?, categoria = ?, estoque_minimo = ? 
+            WHERE id = ?");
+
+        if ($stmt) {
+            // Tipos: s = string, d = double, i = integer
+            $stmt->bind_param('ssdsii', 
+                $nome_pastel, 
+                $ingredientes_pastel, 
+                $preco, 
+                $categoria_pastel, 
+                $estoque_min, 
+                $pastel_id
+            );
+
+            if ($stmt->execute()) {
+                $_SESSION['flash_success'] = 'Pastel atualizado com sucesso.';
+            } else {
+                $_SESSION['flash_error'] = 'Erro ao atualizar pastel: ' . $stmt->error;
+            }
+
+            $stmt->close();
+        } else {
+            $_SESSION['flash_error'] = 'Erro ao preparar atualização: ' . $conn->error;
+        }
+
+        header("Location: pasteis.php");
+        exit();
+    } else {
+        $_SESSION['flash_error'] = implode(' ', $erros);
+    }
 }
-
-$sql .= " ORDER BY m.data_hora DESC";
-
-// Executar a consulta
-$resultado_movimentacoes = $conn->query($sql);
-
-// Buscar todas as pasteis para o filtro
-$sql_pasteis = "SELECT * FROM pasteis ORDER BY nome";
-$resultado_pasteis = $conn->query($sql_pasteis);
 ?>
 
 <!DOCTYPE html>
@@ -47,68 +89,48 @@ $resultado_pasteis = $conn->query($sql_pasteis);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico - Sistema pastelria</title>
+    <title>Editar pastel - Sistema pastelaria</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Histórico</h1>
-        
-        <a href="index.php" class="btn">Voltar</a>
+        <h1>Editar pastel</h1>
 
-        <div>
-            <h3>Filtros</h3>
-            <form method="get">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Pastel:</label>
-                        <select name="pastel">
-                            <option value="">Todas</option>
-                            <?php while($pastel = $resultado_pasteis->fetch_assoc()): ?>
-                                <option value="<?= $pastel['id'] ?>" <?= $filtro_pastel == $pastel['id'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($pastel['nome']) ?>
-                                </option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo:</label>
-                        <select name="tipo">
-                            <option value="">Todos</option>
-                            <option value="entrada" <?= $filtro_tipo == 'entrada' ? 'selected' : '' ?>>Entrada</option>
-                            <option value="saida" <?= $filtro_tipo == 'saida' ? 'selected' : '' ?>>Saída</option>
-                        </select>
-                    </div>
+        <?php if (isset($_SESSION['flash_error'])): ?>
+            <div class="alert error"><?= htmlspecialchars($_SESSION['flash_error']) ?></div>
+            <?php unset($_SESSION['flash_error']); ?>
+        <?php endif; ?>
+
+        <form method="post">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome:</label>
+                    <input type="text" name="nome" required value="<?= htmlspecialchars($pastel['nome']) ?>">
                 </div>
-                <button type="submit" class="btn">Filtrar</button>
-                <a href="historico.php" class="btn">Limpar</a>
-            </form>
-        </div>
-
-        <table>
-            <tr><th>ID</th><th>Data/Hora</th><th>pastel</th><th>Usuário</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr>
-            <?php 
-            // Verificar se tem movimentações
-            if ($resultado_movimentacoes->num_rows > 0): 
-                // Mostrar cada movimentação
-                while($movimentacao = $resultado_movimentacoes->fetch_assoc()): 
-            ?>
-                <tr>
-                    <td><?= $movimentacao['id'] ?></td>
-                    <td><?= date('d/m H:i', strtotime($movimentacao['data_hora'])) ?></td>
-                    <td><?= htmlspecialchars($movimentacao['pastel_nome']) ?></td>
-                    <td><?= htmlspecialchars($movimentacao['usuario_nome']) ?></td>
-                    <td class="<?= $movimentacao['tipo'] ?>"><?= $movimentacao['tipo'] == 'entrada' ? 'Entrada' : 'Saída' ?></td>
-                    <td><?= $movimentacao['quantidade'] ?></td>
-                    <td><?= htmlspecialchars($movimentacao['observacoes']) ?></td>
-                </tr>
-            <?php 
-                endwhile; 
-            else: 
-            ?>
-                <tr><td colspan="7" style="text-align: center; padding: 20px;">Nenhuma movimentação encontrada.</td></tr>
-            <?php endif; ?>
-        </table>
+                <div class="form-group">
+                    <label>Preço (R$):</label>
+                    <input type="number" name="preco" step="0.01" required value="<?= $pastel['preco'] ?>">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Categoria:</label>
+                    <input type="text" name="categoria" required value="<?= htmlspecialchars($pastel['categoria']) ?>">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Estoque Mínimo:</label>
+                    <input type="number" name="estoque_minimo" min="0" required value="<?= $pastel['estoque_minimo'] ?>">
+                </div>
+                <div class="form-group">
+                    <label>Ingredientes:</label>
+                    <textarea name="ingredientes" required><?= htmlspecialchars($pastel['ingredientes']) ?></textarea>
+                </div>
+            </div>
+            <button type="submit" name="update" class="btn">Atualizar</button>
+            <a href="pasteis.php" class="btn">Cancelar</a>
+        </form>
     </div>
 </body>
 </html>

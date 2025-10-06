@@ -2,8 +2,7 @@
 // Começar a sessão
 session_start();
 
-// Se não está logado, vai para o login
-if (!isset($_SESSION['usuario'])) { 
+if (!isset($_SESSION['usuario_id'])) { 
     header('Location: login.php'); 
     exit(); 
 }
@@ -23,12 +22,13 @@ if (!function_exists('app_log')) {
 
 // Se o usuário clicou em "Registrar"
 if (isset($_POST['add_movimento'])) {
-    app_log(['route' => 'mov_add', 'post' => $_POST, 'user' => $_SESSION['usuario'] ?? null]);
+    app_log(['route' => 'mov_add', 'post' => $_POST, 'user' => $_SESSION['usuario_id'] ?? null]);
+    
     $pastel_escolhida = trim($_POST['pastel_id'] ?? '');
     $tipo_movimento = trim($_POST['tipo'] ?? '');
     $quantidade_movimento = trim($_POST['quantidade'] ?? '');
     $observacoes_movimento = trim($_POST['observacoes'] ?? '');
-    $usuario_id = (int)($_SESSION['usuario']['id'] ?? 0);
+    $usuario_id = (int)($_SESSION['usuario_id'] ?? 0); // 🔧 CORRIGIDO AQUI
 
     $erros = array();
     if (!ctype_digit((string)$pastel_escolhida)) { $erros[] = 'pastel inválida.'; }
@@ -90,6 +90,7 @@ $sql_movimentacoes = "SELECT m.*, p.nome as pastel_nome, u.nome as usuario_nome
                       ORDER BY m.data_hora DESC LIMIT 20";
 $resultado_movimentacoes = $conn->query($sql_movimentacoes);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
